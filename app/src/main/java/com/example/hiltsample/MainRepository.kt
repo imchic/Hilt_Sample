@@ -20,5 +20,25 @@ class MainRepository @Inject constructor(
         }
     }
 
+    suspend fun callSurvHuInfo(): ResponseBody<SurvHuInfoResponse> {
+        return try {
+            ApiResponse.create(api.callSurvHuInfo(
+                "99",
+                "050",
+                "60",
+                "3999308",
+                "3900040499",
+                "001",
+                "39"
+            )).apply {
+                //if (!body?.appVersionList.isNullOrEmpty()) {
+                    Timber.d(body.toString())
+                //}
+            }
+        } catch (e: Exception) {
+            ApiResponse.create(e)
+        }
+    }
+
     //suspend fun callAppVersion() = api.callAppVersionApi("fSurvId")
 }

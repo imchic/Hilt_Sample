@@ -15,11 +15,13 @@ class MainViewModel @Inject constructor(
 
 //    private val _text = MutableLiveData<String>()
 //    val text: MutableLiveData<String> = _text
-//
 //    fun setText(text: String) = _text.postValue(text)
 
     private val _res = MutableLiveData<Resource<AppVersionResponse>>()
     val res: LiveData<Resource<AppVersionResponse>> get() = _res
+
+    private val _res2 = MutableLiveData<Resource<SurvHuInfoResponse>>()
+    val res2: LiveData<Resource<SurvHuInfoResponse>> get() = _res2
 
     fun getBaseUrl() {
         repository.getBaeUrl().let {
@@ -47,6 +49,26 @@ class MainViewModel @Inject constructor(
 
         }
 
+    }
+
+    suspend fun getSurvHuInfo() {
+        repository.callSurvHuInfo().let {
+
+            coroutineScope {
+                _res2.postValue(Resource.loading(null))
+                try {
+                    val response = it
+                    if (response.result == ResponseType.SUCCESS) {
+                        _res2.postValue(Resource.success(response.body))
+                    } else {
+                        _res2.postValue(Resource.error(response.message.toString(), null))
+                    }
+                } catch (e: Exception) {
+                    _res2.postValue(Resource.error(e.message.toString(), null))
+                }
+            }
+
+        }
     }
 
 }

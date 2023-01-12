@@ -6,6 +6,7 @@ import com.example.hiltsample.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(
@@ -18,9 +19,16 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(
 
         viewModel.getBaseUrl()
 
-        viewModel.snackBar.observe(this@MainActivity) {
-            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+//        viewModel.snackBar.observe(this@MainActivity) {
+//            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+//        }
+
+        lifecycleScope.launch {
+            viewModel.snackBar.collect {
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+            }
         }
+
     }
 
     override fun initBinding() {
@@ -28,6 +36,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(
         binding.apply {
 
             btnSample2.setOnClickListener {
+                //viewModel.setMessage("btnSample2")
                 viewModel.setMessage("btnSample2")
             }
 
@@ -37,17 +46,46 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>(
                 //Timber.d("${viewModel.text.value}")
 
                 lifecycleScope.launch {
-                    viewModel.getAppVersion()
+
+                    //viewModel.getAppVersion()
+                    viewModel.getSurvHuInfo()
+
                     viewModel.res.observe(this@MainActivity) {
                         when (it.status) {
                             Status.SUCCESS -> {
-                                viewModel.snackBar.postValue("성공 => ${it.data}")
+
+                                // null 아닌것만
+                                it.data?.let { data ->
+                                    if(data.appVersionList.isNullOrEmpty()) {
+                                        Timber.d("$data 데이터가 없습니다.")
+                                    }
+                                }
+
+                                viewModel.setMessage("성공 => ${it.data}")
                             }
                             Status.ERROR -> {
-                                viewModel.snackBar.postValue("실패 => ${it.message}")
+                                viewModel.setMessage("실패 => ${it.message}")
                             }
                             Status.LOADING -> {
-                                viewModel.snackBar.postValue("로딩중")
+                                Timber.d("로딩중")
+                                viewModel.setMessage("로딩중")
+                            }
+
+                            else -> {}
+                        }
+                    }
+
+                    viewModel.res2.observe(this@MainActivity){
+                        when (it.status) {
+                            Status.SUCCESS -> {
+                                viewModel.setMessage("성공 => ${it.data}")
+                            }
+                            Status.ERROR -> {
+                                viewModel.setMessage("실패 => ${it.message}")
+                            }
+                            Status.LOADING -> {
+                                Timber.d("로딩중")
+                                viewModel.setMessage("로딩중")
                             }
 
                             else -> {}
