@@ -33,15 +33,15 @@ object NetworkModule {
         HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
             override fun log(message: String) {
                 if (!message.startsWith("{") && !message.startsWith("[")) {
-                    Timber.tag("OkHttp").d(message)
+                    Timber.tag("RESTAPI").d(message)
                     return
                 }
                 try {
                     // Timber 와 Gson setPrettyPrinting 를 이용해 json 을 보기 편하게 표시해준다.
-                    Timber.tag("OkHttp")
+                    Timber.tag("RESTAPI")
                         .d(GsonBuilder().setPrettyPrinting().create().toJson(JsonParser().parse(message)))
                 } catch (m: JsonSyntaxException) {
-                    Timber.tag("OkHttp").d(message)
+                    Timber.tag("RESTAPI").d(message)
                 }
             }
 
